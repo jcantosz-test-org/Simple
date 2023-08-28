@@ -1,0 +1,35 @@
+name: .NET C#
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    # Install the .NET Core workload
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.x
+
+    - run: dotnet restore
+    - run: dotnet build
+    - run: dotnet publish
+    - run: dotnet pack --configuration Release
+    
+    - run: ls bin/Release/
+    - run: dotnet nuget push bin/Release/Simple.1.0.0.nupkg --api-key ${{ env.GITHUB_TOKEN }} --source github
